@@ -103,6 +103,11 @@ tailscale ip -4           # note l'IP tailscale du VPS (100.x.y.z)
 
 `--ssh` active **Tailscale SSH** : ensuite tu te connectes depuis le Mac sans mot de passe ni clé.
 
+> ⚠️ **Désactive l'expiration de clé du nœud VPS.** Par défaut Tailscale expire la clé d'un nœud
+> après ~180 jours : le VPS sortirait alors du tailnet et tu perdrais l'accès dashboard + SSH-via-tailnet
+> (il ne resterait que le 22 public et la console Hostinger). Console admin Tailscale → machine du VPS
+> → menu `⋯` → **Disable key expiry**. Indispensable pour un déploiement 24/7.
+
 ## 2. SSH propre depuis le Mac
 
 ```bash
@@ -284,6 +289,9 @@ su - hermes -c 'export XDG_RUNTIME_DIR=/run/user/1001 DBUS_SESSION_BUS_ADDRESS=u
 
 # Changer de modèle (ex. passer à un payant après ajout de crédits)
 su - hermes -c 'hermes model'
+
+# Backup de l'état (config, OAuth Nous, token bot, credentials dashboard) — voir §Résilience
+ssh root@$VPS 'tar czf - -C /home/hermes .hermes/.env .hermes/config 2>/dev/null' > "hermes-backup-$(date +%F).tar.gz"
 ```
 
 ## Sécurité — récapitulatif
@@ -294,10 +302,31 @@ su - hermes -c 'hermes model'
   (`ufw delete allow OpenSSH`) et/ou couper l'auth par mot de passe `sshd`. Cf. ADR §1.
 - **Pas d'exposition applicative** : dashboard et gateway joignables uniquement via le tailnet.
 - **Auth** : dashboard derrière basic-auth ; Telegram deny-by-default + DM pairing.
+- **`http://` sans TLS, volontaire** : le dashboard sert en clair, mais le seul chemin pour l'atteindre
+  est le tunnel Tailscale (WireGuard), déjà chiffré de bout en bout. Pas de certificat à gérer ; le
+  mot de passe basic-auth ne transite jamais hors du tunnel chiffré.
 - **User non-privilégié** : l'agent tourne en `hermes` (pas root, pas de sudo sans mot de passe).
 - **Backend terminal `local`** : acceptable pour usage solo + allowlist. Si ouverture à des tiers
   ou ingestion de contenu non fiable → envisager un backend isolé (cf. la doc sécurité du projet Hermes upstream).
 - **Secret redaction** active sur le gateway (logs/réponses scrubbés).
+
+## Résilience & limites connues
+
+Points opérationnels à connaître pour un fonctionnement 24/7 durable :
+
+- **Expiration de clé Tailscale** : à désactiver sur le nœud VPS (cf. §1). Sans ça, le VPS sort du
+  tailnet après ~180 j et l'accès dashboard + SSH-via-tailnet est perdu (filet : 22 public + console
+  Hostinger).
+- **Backup / disaster recovery** : tout l'état vit dans `~/.hermes` (OAuth Nous, token bot Telegram,
+  `.env` credentials dashboard). Sans sauvegarde, un VPS perdu/réinstallé = tout à refaire à la main.
+  Sauvegarder régulièrement (cf. snippet en §Maintenance) et stocker hors-VPS. Ces fichiers
+  contiennent des secrets → backup chiffré, jamais commité.
+- **Dépendance Tailscale** : si le tailnet est indisponible (panne, compte, clé), l'accès passe par le
+  22 public puis la console web Hostinger (hors-bande). C'est le filet ultime — ne pas le supprimer.
+- **Modèle gratuit Nous** : `nemotron-3-ultra:free` peut être rate-limité, voire retiré côté provider.
+  Bascule vers un payant en 1 commande (`hermes model`, après ajout de crédits) — cf. ADR §5.
+- **Mises à jour OS** : `unattended-upgrades` est installé (sécurité auto), mais sans reboot
+  automatique : un kernel mis à jour ne s'applique qu'au prochain reboot manuel.
 
 ## Fichiers de ce dépôt
 

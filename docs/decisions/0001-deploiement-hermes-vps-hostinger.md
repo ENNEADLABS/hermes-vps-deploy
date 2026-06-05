@@ -35,6 +35,8 @@ que via le tailnet.
 - (+) SSH/scp depuis le Mac sans clé à gérer ; l'app desktop atteint le backend par IP tailscale.
 - (−) Dépendance à Tailscale (coordination, compte). Mitigé : la console web Hostinger reste un
   accès hors-bande de secours.
+- (−) **Expiration de clé du nœud** : Tailscale expire les clés (~180 j) par défaut → le VPS sortirait
+  du tailnet. Mitigation obligatoire pour du 24/7 : *Disable key expiry* sur le nœud VPS (cf. README §1).
 - (−) **Le port 22 reste ouvert sur l'IP publique** : `ufw allow OpenSSH` ouvre 22/tcp sur *toutes*
   les interfaces (pas seulement `tailscale0`). C'est volontaire — filet anti-lockout si `tailscaled`
   tombe et que la console Hostinger est indisponible — mais c'est la **seule surface publique**
