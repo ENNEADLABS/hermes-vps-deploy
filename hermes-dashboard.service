@@ -1,0 +1,29 @@
+# hermes-dashboard.service — backend que l'app desktop pilote (system service, tourne en User=hermes).
+# Installation (en root) :
+#   sudo cp hermes-dashboard.service /etc/systemd/system/hermes-dashboard.service
+#   sudo systemctl daemon-reload && sudo systemctl enable --now hermes-dashboard
+#
+# Bind 0.0.0.0 -> écoute aussi sur tailscale0. UFW n'autorise l'entrée que sur
+# tailscale0 (cf. 01-vps-prep.sh), donc rien n'est exposé en clair sur internet.
+# Le bind non-loopback active la auth gate ; basic-auth (.env) = 2e couche.
+[Unit]
+Description=Hermes Dashboard - backend app desktop
+After=network-online.target tailscaled.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=hermes
+Group=hermes
+WorkingDirectory=/home/hermes/.hermes
+EnvironmentFile=/home/hermes/.hermes/.env
+Environment="PATH=/home/hermes/.hermes/hermes-agent/venv/bin:/home/hermes/.hermes/hermes-agent/node_modules/.bin:/home/hermes/.hermes/node/bin:/home/hermes/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Environment="VIRTUAL_ENV=/home/hermes/.hermes/hermes-agent/venv"
+Environment="HERMES_HOME=/home/hermes/.hermes"
+ExecStart=/home/hermes/.hermes/hermes-agent/venv/bin/python -m hermes_cli.main dashboard --no-open --host 0.0.0.0 --port 9119 --skip-build
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

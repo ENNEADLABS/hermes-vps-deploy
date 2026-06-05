@@ -1,0 +1,19 @@
+# Secrets — ne JAMAIS committer.
+# Les credentials de ce déploiement vivent sur le VPS dans ~/.hermes/.env (mode 600),
+# pas ici. Ces règles sont un filet préventif.
+.env
+.env.*
+*.pem
+*.key
+id_rsa*
+*credentials*
+service-account*
+
+# macOS / éditeurs
+.DS_Store
+*.swp
+*~
+
+# Handoff (local, non versionné)
+.claude/handoff.md
+.claude/handoff-history/
