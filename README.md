@@ -310,6 +310,9 @@ ssh root@$VPS 'tar czf - -C /home/hermes .hermes/.env .hermes/config 2>/dev/null
   ou ingestion de contenu non fiable → envisager un backend isolé (cf. la doc sécurité du projet Hermes upstream).
 - **Secret redaction** active sur le gateway (logs/réponses scrubbés).
 
+> Modèle de menace complet, durcissement recommandé et signalement de vulnérabilité : voir
+> [`SECURITY.md`](SECURITY.md).
+
 ## Résilience & limites connues
 
 Points opérationnels à connaître pour un fonctionnement 24/7 durable :
@@ -336,3 +339,5 @@ Points opérationnels à connaître pour un fonctionnement 24/7 durable :
 | `02-hermes-user-setup.sh` | Install Hermes (user hermes) |
 | `hermes-dashboard.service` | Service systemd system du dashboard |
 | `docs/decisions/0001-*.md` | ADR : décisions d'architecture et justifications |
+| `SECURITY.md` | Modèle de menace du déploiement + signalement de vulnérabilité |
+| `LICENSE` | Licence MIT |
