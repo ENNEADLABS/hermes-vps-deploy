@@ -17,3 +17,6 @@ service-account*
 # Handoff (local, non versionné)
 .claude/handoff.md
 .claude/handoff-history/
+
+# Plans de travail privés (stratégie multi-agent — hors repo public)
+.claude/plans/
