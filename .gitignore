@@ -20,3 +20,6 @@ service-account*
 
 # Plans de travail privés (stratégie multi-agent — hors repo public)
 .claude/plans/
+
+# Layout opérationnel local (vraies valeurs — template public dans docs/layout.md)
+docs/layout.local.md
