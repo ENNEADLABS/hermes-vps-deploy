@@ -23,3 +23,6 @@ service-account*
 
 # Layout opérationnel local (vraies valeurs — template public dans docs/layout.md)
 docs/layout.local.md
+
+# Docs personnelles (stratégie, profils famille — hors repo public)
+docs/perso/
